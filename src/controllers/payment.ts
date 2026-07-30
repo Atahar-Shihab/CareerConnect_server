@@ -14,6 +14,9 @@ export const createCheckoutSession = async (req: AuthRequest, res: Response): Pr
   try {
     const { planType } = req.body;
     
+    // Dynamic origin fallback (Vercel domain or localhost)
+    const clientUrl = req.headers.origin || process.env.CLIENT_URL || 'https://career-connect-client-theta.vercel.app';
+
     const amount = planType === 'employer_featured' ? 1000 : 500; // $10 or $5 USD
     const itemName = planType === 'employer_featured' 
       ? 'CareerConnect Premium Featured Campus Job' 
@@ -35,8 +38,8 @@ export const createCheckoutSession = async (req: AuthRequest, res: Response): Pr
         },
       ],
       mode: 'payment',
-      success_url: `http://localhost:3000/dashboard?payment=success`,
-      cancel_url: `http://localhost:3000/dashboard?payment=cancel`,
+      success_url: `${clientUrl}/dashboard?payment=success`,
+      cancel_url: `${clientUrl}/dashboard?payment=cancel`,
     });
 
     res.json({ url: session.url, id: session.id });
