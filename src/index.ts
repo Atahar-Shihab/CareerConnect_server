@@ -46,15 +46,15 @@ const seedIfEmpty = async () => {
     const passwordHash = await bcrypt.hash('password123', salt);
 
     const employer = await User.create({
-      name: 'TechCorp Bangladesh',
-      email: 'hr@techcorp.bd',
+      name: 'CodeCraft BD',
+      email: 'hr@codecraft.bd',
       passwordHash,
       role: 'employer',
     });
 
     const student = await User.create({
-      name: 'Shihab',
-      email: 'shihab@brac.bd.com',
+      name: 'Rahat Ahmed',
+      email: 'rahat@demo.cc',
       passwordHash,
       role: 'student'
     });
@@ -70,7 +70,7 @@ const seedIfEmpty = async () => {
       {
         employerId: employer._id,
         title: 'Junior React & Next.js Developer',
-        companyName: 'TechCorp Bangladesh',
+        companyName: 'CodeCraft BD',
         location: 'Dhaka (Gulshan-2)',
         description: 'We are seeking a proactive Junior Frontend Engineer from university campus drives. You will work on cutting-edge Web3 and AI web applications using Next.js 14, Tailwind CSS, and TypeScript.',
         requirements: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'REST APIs'],
@@ -79,7 +79,7 @@ const seedIfEmpty = async () => {
       {
         employerId: employer._id,
         title: 'AI Product Engineering Intern',
-        companyName: 'Brain Station 23',
+        companyName: 'NovaByte Solutions',
         location: 'Remote / Dhaka',
         description: 'Hands-on internship for CS students interested in LLM integration, prompt engineering, and Node.js microservices. Flexible hours around your university class schedule.',
         requirements: ['Node.js', 'Express', 'Python', 'LLM API', 'MongoDB'],
@@ -88,16 +88,16 @@ const seedIfEmpty = async () => {
       {
         employerId: employer._id,
         title: 'Full Stack MERN Developer',
-        companyName: 'Pathao Tech',
+        companyName: 'SwiftRide Tech',
         location: 'Dhaka (Midtown)',
-        description: 'Join Pathao Tech to scale logistics and food delivery platforms. Looking for final year students or fresh grads with strong problem-solving skills.',
+        description: 'Join SwiftRide Tech to scale logistics and food delivery platforms. Looking for final year students or fresh grads with strong problem-solving skills.',
         requirements: ['React', 'Node.js', 'Express', 'MongoDB', 'Docker'],
         type: 'full-time'
       },
       {
         employerId: employer._id,
         title: 'UI/UX & Product Design Fellow',
-        companyName: 'ShopUp',
+        companyName: 'BazaarStack',
         location: 'Dhaka (Banani)',
         description: 'Design beautiful, intuitive interfaces for Bangladeshi merchants. Create design systems, user flows, and interactive Figma prototypes.',
         requirements: ['Figma', 'UI/UX Design', 'Wireframing', 'User Research'],
@@ -106,7 +106,7 @@ const seedIfEmpty = async () => {
       {
         employerId: employer._id,
         title: 'Python & Data Science Research Fellow',
-        companyName: 'bKash Tech',
+        companyName: 'PayWave Digital',
         location: 'Dhaka (Nikunja)',
         description: 'Analyze financial transaction data and build predictive machine learning models using Python, Pandas, and Scikit-Learn.',
         requirements: ['Python', 'Pandas', 'Machine Learning', 'SQL', 'Data Analytics'],
@@ -115,7 +115,7 @@ const seedIfEmpty = async () => {
       {
         employerId: employer._id,
         title: 'Flutter Mobile App Developer',
-        companyName: 'Chaldal Tech',
+        companyName: 'FreshCart Tech',
         location: 'Remote / Dhaka',
         description: 'Build cross-platform iOS & Android grocery delivery applications using Flutter, Dart, and Firebase.',
         requirements: ['Flutter', 'Dart', 'Firebase', 'State Management'],
@@ -124,7 +124,7 @@ const seedIfEmpty = async () => {
       {
         employerId: employer._id,
         title: 'Cyber Security & DevOps Analyst',
-        companyName: 'Therap BD',
+        companyName: 'MedLink Systems',
         location: 'Dhaka (Mohakhali)',
         description: 'Monitor cloud infrastructure, configure Docker containers, and implement vulnerability assessments for healthcare software.',
         requirements: ['DevOps', 'Docker', 'Linux', 'Cyber Security', 'AWS'],
@@ -133,7 +133,7 @@ const seedIfEmpty = async () => {
       {
         employerId: employer._id,
         title: 'QA & Automated Testing Fellow',
-        companyName: 'Kaz Software',
+        companyName: 'PixelForge Labs',
         location: 'Dhaka (Uttara)',
         description: 'Write automated end-to-end regression tests using Cypress, Playwright, and Selenium for enterprise Web applications.',
         requirements: ['Selenium', 'Cypress', 'JavaScript', 'QA Testing'],

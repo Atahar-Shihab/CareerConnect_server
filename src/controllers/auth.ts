@@ -61,6 +61,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    if (user.authProvider === 'google') {
+      res.status(400).json({ error: 'This account uses Google Sign-In. Please use the Google login button.' });
+      return;
+    }
+
     const payload = { id: user.id, role: user.role };
     const token = jwt.sign(payload, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '7d' });
 
@@ -89,8 +94,8 @@ export const googleLogin = async (req: Request, res: Response): Promise<void> =>
   try {
     const { credential, role } = req.body;
 
-    let userEmail = 'shihab@brac.bd.com';
-    let userName = 'Shihab (Google)';
+    let userEmail = '';
+    let userName = '';
 
     if (credential) {
       try {
@@ -105,21 +110,33 @@ export const googleLogin = async (req: Request, res: Response): Promise<void> =>
         }
       } catch (verifyError) {
         console.warn('Google Token verification fallback:', verifyError);
+        res.status(401).json({ error: 'Google authentication failed. Invalid token.' });
+        return;
       }
     } else if (req.body.email) {
       userEmail = req.body.email;
       userName = req.body.name || req.body.email.split('@')[0];
+    } else {
+      res.status(400).json({ error: 'Google credential or email required' });
+      return;
+    }
+
+    if (!userEmail) {
+      res.status(400).json({ error: 'Google authentication failed. Email not found.' });
+      return;
     }
 
     let user = await User.findOne({ email: userEmail });
     if (!user) {
       const salt = await bcrypt.genSalt(10);
-      const passwordHash = await bcrypt.hash('google_oauth_secure_pass', salt);
+      const randomPassword = require('crypto').randomBytes(32).toString('hex');
+      const passwordHash = await bcrypt.hash(randomPassword, salt);
       user = new User({
         name: userName,
         email: userEmail,
         passwordHash,
         role: role || 'student',
+        authProvider: 'google'
       });
       await user.save();
 
