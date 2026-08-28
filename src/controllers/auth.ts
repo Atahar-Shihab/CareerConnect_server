@@ -55,14 +55,14 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const isMatch = await bcrypt.compare(password, user.passwordHash);
-    if (!isMatch) {
-      res.status(400).json({ error: 'Invalid credentials' });
+    if (user.authProvider === 'google') {
+      res.status(400).json({ error: 'This account uses Google Sign-In. Please use the Google login button.' });
       return;
     }
 
-    if (user.authProvider === 'google') {
-      res.status(400).json({ error: 'This account uses Google Sign-In. Please use the Google login button.' });
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    if (!isMatch) {
+      res.status(400).json({ error: 'Invalid credentials' });
       return;
     }
 
@@ -94,31 +94,46 @@ export const googleLogin = async (req: Request, res: Response): Promise<void> =>
   try {
     const { credential, role } = req.body;
 
+    if (!credential) {
+      res.status(400).json({ error: 'Google credential is required.' });
+      return;
+    }
+
     let userEmail = '';
     let userName = '';
 
-    if (credential) {
+    // Strategy 1: Try verifying as an ID token (from GoogleLogin component)
+    try {
+      const ticket = await googleClient.verifyIdToken({
+        idToken: credential,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      const googlePayload = ticket.getPayload();
+      if (googlePayload?.email) {
+        userEmail = googlePayload.email;
+        userName = googlePayload.name || googlePayload.email.split('@')[0];
+      }
+    } catch {
+      // Strategy 2: Treat as an access token (from useGoogleLogin hook)
+      // and fetch user info from Google's userinfo endpoint
       try {
-        const ticket = await googleClient.verifyIdToken({
-          idToken: credential,
-          audience: process.env.GOOGLE_CLIENT_ID,
+        const googleRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${credential}` },
         });
-        const googlePayload = ticket.getPayload();
-        if (googlePayload?.email) {
-          userEmail = googlePayload.email;
-          userName = googlePayload.name || googlePayload.email.split('@')[0];
+        if (!googleRes.ok) {
+          res.status(401).json({ error: 'Google authentication failed. Invalid token.' });
+          return;
         }
-      } catch (verifyError) {
-        console.warn('Google Token verification fallback:', verifyError);
-        res.status(401).json({ error: 'Google authentication failed. Invalid token.' });
+        const googleUser = await googleRes.json();
+        if (googleUser.email) {
+          userEmail = googleUser.email;
+          userName = googleUser.name || googleUser.email.split('@')[0];
+        }
+      } catch (fetchError) {
+        console.error('Google userinfo fetch error:', fetchError);
+        res.status(401).json({ error: 'Google authentication failed. Could not verify token.' });
         return;
       }
-    } else if (req.body.email) {
-      userEmail = req.body.email;
-      userName = req.body.name || req.body.email.split('@')[0];
-    } else {
-      res.status(400).json({ error: 'Google credential or email required' });
-      return;
     }
 
     if (!userEmail) {
@@ -140,12 +155,14 @@ export const googleLogin = async (req: Request, res: Response): Promise<void> =>
       });
       await user.save();
 
-      const profile = new Profile({
-        userId: user._id,
-        bio: 'Authenticated via Google OAuth.',
-        skills: ['React', 'Next.js', 'Node.js', 'TypeScript', 'Tailwind CSS']
-      });
-      await profile.save();
+      if (user.role === 'student') {
+        const profile = new Profile({
+          userId: user._id,
+          bio: 'Authenticated via Google OAuth.',
+          skills: ['React', 'Next.js', 'Node.js', 'TypeScript', 'Tailwind CSS']
+        });
+        await profile.save();
+      }
     }
 
     const payload = { id: user.id, role: user.role };
